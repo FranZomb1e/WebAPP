@@ -2,29 +2,6 @@ var https = require('https');
 var cheerio = require('cheerio');
 var iconv = require('iconv-lite');
 
-// $("#Reddit").click(function(){
-//   title = [];
-//   getRedditPosts();
-  
-// })
-
-// $("#Hacknews").click(function(){
-//   title = [];
-//   getHacknews();
-
-// })
-
-// $("#Medium").click(function(){
-//   title = [];
-//   getMedium();
-  
-// })
-
-// $("#Slahdot").click(function(){
-//   title = [];
-//   getSlashdot();
-  
-// })
 
 
 
@@ -44,16 +21,8 @@ function getReddit() {
         redditResponse.data.children.forEach(function(child) {
           if(child.data.domain !== 'self.node') {
             titles.push({
-              titile:child.data.title, url:child.data.url
+              title:child.data.title, url:child.data.url
             })
-            // console.log('-------------------------------');
-            // console.log('Author : ' + child.data.author);
-            // console.log('Domain : ' + child.data.domain);
-            // console.log('Title : ' + child.data.title);
-            // console.log('URL : ' + child.data.url);
-          
-            // document.getElementByTagName("article").innerHTML = result;
-
           }
         });
         resolve(titles);
@@ -67,41 +36,153 @@ function getReddit() {
 }
 
 
-// // --------------------------------------------------------
+// // // --------------------------------------------------------
 
-// function getHacknews() {
+function getHackernews() {
+  return new Promise((resolve, reject) => {
+      var url = 'https://news.ycombinator.com/';
+      var request = https.get(url, function(response) {
+        var chunks = [];
+        response.on('data', function(chunk) {
+          chunks.push(chunk);
+        });
+        response.on('end', function() {
+          var titles = [];
+          var html = iconv.decode(Buffer.concat(chunks), 'utf-8');
+          var $ = cheerio.load(html, {decodeEntities: false});
+          $('.itemlist .storylink').each(function (idx, element) {
+            var $element = $(element);
+            titles.push({
+              title: $element.text(), url:$element.attr("href")
+            })
+          })
+          console.log(titles); 
+          resolve(titles); 
+        });
+      });
+      request.on('error', function(err) {
+      console.log(err);
+      reject(err)
+    })
+  })
+}
 
-//   var url = 'https://news.ycombinator.com/';
+function getSlashdot() {
+  return new Promise((resolve, reject) => {
+      var url = 'https://slashdot.org/';
+      var request = https.get(url, function(response) {
+        var chunks = [];
+        response.on('data', function(chunk) {
+          chunks.push(chunk);
+        });
+        response.on('end', function() {
+          var titles = [];
+          var html = iconv.decode(Buffer.concat(chunks), 'utf-8');
+          var $ = cheerio.load(html, {decodeEntities: false});
+          $('.container .story-title').each(function (idx, element) {
+            var $element = $(element);
+            titles.push({
+              title: $element.text(), url:$element.find("a").attr("href")
+            })
+          })   
+          resolve(titles);    
+        });
+      });
+      request.on('error', function(err) {
+      console.log(err);
+      reject(err)
+    })
+  })
+}
 
-//   fetch(url)
-//     .then(
-//       function(response){
-//         if(response.status !== 200){
-//           console.log(response.text());
-//         }
-//       },
-//       (err) => {
-//         console.error(err)
-//       }
-//   )
-//   }
+function getMedium() {
+  return new Promise((resolve, reject) => {
+      var url = 'https://medium.com/topic/technology';
+      var request = https.get(url, function(response) {
+        var chunks = [];
+        response.on('data', function(chunk) {
+          chunks.push(chunk);
+        });
+        response.on('end', function() {
+          var titles = [];
+          var html = iconv.decode(Buffer.concat(chunks), 'utf-8');
+          var $ = cheerio.load(html, {decodeEntities: false});
+          $('#container .u-flex0.u-sizeFullWidth').each(function (idx, element) {
+            var $element = $(element);
+            titles.push({
+              title: $element.text(), url:$element.find("a").attr("href")
+            })
+          })   
+          resolve(titles);    
+        });
+      });
+      request.on('error', function(err) {
+      console.log(err);
+      reject(err)
+    })
+  })
+}
 
-//     sres.on('end', function() {
-//       var titles = [];
 
-//       var html = iconv.decode(Buffer.concat(chunks), 'utf-8');
-//       var $ = cheerio.load(html, {decodeEntities: false});
-//       $('.itemlist .storylink').each(function (idx, element) {
-//         var $element = $(element);
-//         titles.push({
-//           title: $element.text(), url:$element.attr("href")
-//         })
-//       })
-//       console.log(titles);     
 
-//     });
-//   });
+
+// function getSlashdot() {
+//   return new Promise((resolve, reject) => {
+//       var url = 'https://slashdot.org/';
+//       var request = https.get(url, function(response) {
+//         var chunks = [];
+//         sres.on('end', function() {
+//           var titles = [];
+//           var html = iconv.decode(Buffer.concat(chunks), 'utf-8');
+//           var $ = cheerio.load(html, {decodeEntities: false});
+//           $('.container .story-title').each(function (idx, element) {
+//             var $element = $(element);
+//             titles.push({
+//               title: $element.text(), url:$element.find("a").attr("href")
+//             })
+//           })       
+//         });
+//         resolve(titles);
+//       });
+//       request.on('error', function(err) {
+//       console.log(err);
+//       reject(err)
+//     })
+//   })
 // }
+
+// function getMedium() {
+//   return new Promise((resolve, reject) => {
+//       var url = 'https://medium.com/topic/technology';
+//       var request = https.get(url, function(response) {
+//         var chunks = [];
+//         sres.on('data', function(chunk) {
+//           chunks.push(chunk);
+//         });
+//         sres.on('end', function() {
+//           var titles = [];
+//           var html = iconv.decode(Buffer.concat(chunks), 'utf-8');
+//           var $ = cheerio.load(html, {decodeEntities: false});
+//           $('#container .u-flex0.u-sizeFullWidth').each(function (idx, element) {
+//             var $element = $(element);
+//             titles.push({
+//               title: $element.text(), url:$element.find("a").attr("href")
+//             })
+//           })       
+//         });
+//         console.log(titles);
+//         resolve(titles);
+//       });
+//       request.on('error', function(err) {
+//       console.log(err);
+//       reject(err)
+//     })
+//   })
+// }
+
+
+
+
 
 
 // function getHackernews() {
@@ -118,16 +199,17 @@ function getReddit() {
 
 //       var html = iconv.decode(Buffer.concat(chunks), 'utf-8');
 //       var $ = cheerio.load(html, {decodeEntities: false});
-//       $('.itemlist .story-title').each(function (idx, element) {
+//       $('.itemlist .storylink').each(function (idx, element) {
 //         var $element = $(element);
 //         titles.push({
 //           title: $element.text(), url:$element.find("a").attr("href")
 //         })
-
-//       })       
+//       })   
+//       console.log(titles);      
 //     });
 //   });
 // }
+// getHackernews();
 
 
 // function getSlashdot() {
@@ -165,9 +247,7 @@ function getReddit() {
 //     sres.on('data', function(chunk) {
 //       chunks.push(chunk);
 //     });
-//     // chunks里面存储着网页的 html 内容，将它zhuan ma传给 cheerio.load 之后
-//     // 就可以得到一个实现了 jQuery 接口的变量，将它命名为 `$`
-//     // 剩下就都是 jQuery 的内容了
+
 //     sres.on('end', function() {
 //        var titles = [];
 
@@ -184,7 +264,9 @@ function getReddit() {
 //   });
 // }
 
-// exports.getMedium = getMedium;
+
 exports.getReddit = getReddit;
-// exports.getSlashdot = getSlashdot;
-// exports.getMedium = getMedium;
+exports.getSlashdot = getSlashdot;
+exports.getMedium = getMedium;
+exports.getHackernews = getHackernews;
+
